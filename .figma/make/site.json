@@ -1,0 +1,10 @@
+{
+  "description": "Provides retail and supply chain managers with AI-driven demand forecasts, inventory insights, and actionable restock recommendations to optimize stock levels.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

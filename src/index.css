@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: linear-gradient(135deg, #e8f0fe 0%, #f0f4ff 25%, #fafbff 50%, #f5f0ff 75%, #eef5ff 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glass card */
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 24px rgba(99, 120, 200, 0.08), 0 1px 4px rgba(99, 120, 200, 0.06);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 32px rgba(99, 120, 200, 0.12), 0 2px 8px rgba(99, 120, 200, 0.08);
+}
+
+.glass-sidebar {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-right: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 2px 0 20px rgba(99, 120, 200, 0.07);
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 16px rgba(99, 120, 200, 0.08);
+}
+
+.glass-inset {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.glass-dark-inset {
+  background: rgba(240, 244, 255, 0.6);
+  border: 1px solid rgba(180, 200, 255, 0.3);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  background: #6366f1;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+/* Density-driven table row padding */
+table tbody tr td {
+  padding-top: var(--row-py, 10px);
+  padding-bottom: var(--row-py, 10px);
+}
+
+/* Dark mode: override glass surface colours */
+.dark-mode .glass {
+  background: rgba(17, 24, 39, 0.82) !important;
+  border-color: rgba(30, 45, 69, 0.85) !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25) !important;
+}
+.dark-mode .glass-strong {
+  background: rgba(17, 24, 39, 0.92) !important;
+  border-color: rgba(36, 51, 82, 0.95) !important;
+}
+.dark-mode .glass-inset {
+  background: rgba(11, 15, 26, 0.65) !important;
+  border-color: rgba(30, 45, 69, 0.7) !important;
+}
+.dark-mode body,
+.dark-mode {
+  background: linear-gradient(135deg, #0b0f1a 0%, #0d1320 50%, #0f1629 100%) !important;
+}
+
+/* Skeleton shimmer */
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Pulse animation for critical status */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+.pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+/* Smooth button press */
+button:active {
+  transform: scale(0.97);
+}
+
+/* Card hover lift */
+.glass-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.glass-hover:hover {
+  box-shadow: 0 8px 32px rgba(99,102,241,0.14), 0 2px 8px rgba(99,102,241,0.08);
+  transform: translateY(-1px);
+}
+
+/* Better focus rings */
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid rgba(99,102,241,0.5);
+  outline-offset: 2px;
+}
