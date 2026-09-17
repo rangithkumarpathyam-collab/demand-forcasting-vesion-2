@@ -270,3 +270,53 @@ def db_update_product(sku: str, updates: Dict[str, Any]) -> bool:
     conn.commit()
     conn.close()
     return True
+
+def db_get_anomalies() -> List[Dict[str, Any]]:
+    sp = get_supabase_client()
+    if sp:
+        try:
+            res = sp.table("anomalies").select("*").order("created_at", desc=True).execute()
+            if res.data:
+                return res.data
+        except Exception as e:
+            print(f"[Supabase] anomalies error: {e}")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM anomalies ORDER BY created_at DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def db_update_anomaly(anomaly_id: str, new_status: str) -> bool:
+    sp = get_supabase_client()
+    if sp:
+        try:
+            sp.table("anomalies").update({"status": new_status}).eq("id", anomaly_id).execute()
+        except Exception as e:
+            print(f"[Supabase] anomaly update error: {e}")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE anomalies SET status = ? WHERE id = ?", (new_status, anomaly_id))
+    conn.commit()
+    conn.close()
+    return True
+
+def db_get_sales_history() -> List[Dict[str, Any]]:
+    sp = get_supabase_client()
+    if sp:
+        try:
+            res = sp.table("sales_history").select("*").order("id").execute()
+            if res.data:
+                return res.data
+        except Exception as e:
+            print(f"[Supabase] sales_history error: {e}")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT sale_date, actual_sales FROM sales_history ORDER BY id ASC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
