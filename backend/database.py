@@ -2,9 +2,41 @@ import sqlite3
 import os
 import json
 from datetime import datetime, timedelta
+from typing import Optional, List, Dict, Any
+
+# Optional Supabase client
+try:
+    from supabase import create_client, Client
+except ImportError:
+    create_client = None
+    Client = Any
 
 DB_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(DB_DIR, "demandai.db")
+
+_supabase_client: Optional[Client] = None
+
+def get_supabase_client() -> Optional[Client]:
+    """Returns initialized Supabase client if URL and KEY are set in environment."""
+    global _supabase_client
+    if _supabase_client is not None:
+        return _supabase_client
+
+    supabase_url = os.getenv("SUPABASE_URL", "").strip()
+    supabase_key = os.getenv("SUPABASE_KEY", "").strip()
+
+    if supabase_url and supabase_key and create_client:
+        try:
+            _supabase_client = create_client(supabase_url, supabase_key)
+            print(f"[Supabase] Connected successfully to {supabase_url}")
+            return _supabase_client
+        except Exception as e:
+            print(f"[Supabase] Connection error: {e}. Falling back to SQLite.")
+            return None
+    return None
+
+def is_supabase_active() -> bool:
+    return get_supabase_client() is not None
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -12,6 +44,7 @@ def get_db():
     return conn
 
 def init_db():
+    # Always ensure local SQLite fallback is initialized
     conn = get_db()
     cursor = conn.cursor()
 
@@ -104,6 +137,13 @@ def init_db():
     seed_data_if_empty(conn)
     conn.close()
 
+    # Check Supabase status
+    sp = get_supabase_client()
+    if sp:
+        print("[Database] Primary database: Supabase PostgreSQL (Cloud)")
+    else:
+        print("[Database] Primary database: Local SQLite (demandai.db)")
+
 def seed_data_if_empty(conn):
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM products")
@@ -194,3 +234,39 @@ def seed_data_if_empty(conn):
             cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (k, v))
 
         conn.commit()
+
+# --- Unified Data Access Helpers (Supabase with SQLite Fallback) ---
+
+def db_get_products() -> List[Dict[str, Any]]:
+    sp = get_supabase_client()
+    if sp:
+        try:
+            res = sp.table("products").select("*").order("stock").execute()
+            if res.data:
+                return res.data
+        except Exception as e:
+            print(f"[Supabase] query error: {e}")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM products ORDER BY stock ASC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def db_update_product(sku: str, updates: Dict[str, Any]) -> bool:
+    sp = get_supabase_client()
+    if sp:
+        try:
+            sp.table("products").update(updates).eq("sku", sku).execute()
+        except Exception as e:
+            print(f"[Supabase] update error: {e}")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    set_clauses = [f"{k} = ?" for k in updates.keys()]
+    values = list(updates.values()) + [sku]
+    cursor.execute(f"UPDATE products SET {', '.join(set_clauses)}, updated_at = CURRENT_TIMESTAMP WHERE sku = ?", values)
+    conn.commit()
+    conn.close()
+    return True
